@@ -2,7 +2,7 @@
 
 <h3>Assignment list</h3>
 
-- [ ] Assignment 1 due: 10-19
+- [ ] Assignment 1 due: 10-9
 - [ ] Assignment 2 due:
 - [ ] Assignment 3 due:
 - [ ] Assignment 4 due:
@@ -34,10 +34,21 @@
 6. I/O structure:
    1. synchronous I/O: CPU会等待I/O设备完成数据的读写，然后再去做其他的事情。只允许同时进行一个I/O操作。
    2. asynchronous I/O: CPU不会等待I/O设备完成数据的读写，而是直接去做其他的事情，当I/O设备完成数据的读写后，会发送一个中断信号给CPU，CPU会暂停当前的工作，转而去处理I/O设备的数据
-7. Storage structure:
-   1. main memory: 用来存储程序和数据，是易失性的，断电后数据会丢失
-   2. secondary storage: 用来存储程序和数据，是非易失性的，断电后数据不会丢失
+7. Storage structure: registers -> cache -> main memory -> magnetic disk -> optical disk -> magnetic tape
+   1. main memory: 用来存储程序和数据，是易失性的，断电后数据会丢失， 也叫做RAM(random access memory)
+   2. secondary storage: 用来存储程序和数据，是非易失性的，断电后数据不会丢失，
    3. cache: 位于CPU和主存之间，用来缓存主存中的数据，是易失性的，断电后数据会丢失
    4. magnetic disk: 位于主存和磁带之间，用来存储程序和数据，是非易失性的，断电后数据不会丢失
    5. optical disk: 位于磁盘和磁带之间，用来存储程序和数据，是非易失性的，断电后数据不会丢失
    6. magnetic tape: 用来存储程序和数据，是非易失性的，断电后数据不会丢失
+   7. Direct Memory Access Structure: ![Alt text](image.png)![Alt text](image-2.png)
+   8. Multiprocessing system (parallel system, multicore system): 一个计算机系统中有多个CPU，每个CPU都有自己的寄存器和cache，但是共享主存和I/O设备
+   9. Clustered system: 一个计算机系统中有多个计算机，每个计算机都有自己的寄存器、cache、主存和I/O设备，但是共享磁盘![Alt text](image-3.png)
+8. Operating system structure
+    1. 多通道程序能力：提高CPU利用率
+    2. job pool: 用来存放所有的作业，当CPU空闲时，从job pool中取出一个作业，放到内存中去执行
+    3. time sharing: 分时操作系统允许许多⽤户同时共享⼀台计算机，系统在多用户间快速切换
+    4. job scheduling: 从job pool中取出一个作业，放到内存中去执行
+    5. CPU scheduling: 从内存中取出一个作业，放到CPU中去执行
+9. OS operations:
+   1.  
