@@ -50,5 +50,9 @@
     3. time sharing: 分时操作系统允许许多⽤户同时共享⼀台计算机，系统在多用户间快速切换
     4. job scheduling: 从job pool中取出一个作业，放到内存中去执行
     5. CPU scheduling: 从内存中取出一个作业，放到CPU中去执行
-9. OS operations:
-   1.  
+9. OS operations
+10. Transition from User to Kernel Mode
+    1. user mode: 用户程序运行在用户模式下，只能访问用户空间，不能访问内核空间
+    2. kernel mode: 内核程序运行在内核模式下，可以访问用户空间和内核空间
+    3. ![Alt text](image-4.png)
+    4. calls system call: trap (mode bit = 0), 从用户模式切换到内核模式
