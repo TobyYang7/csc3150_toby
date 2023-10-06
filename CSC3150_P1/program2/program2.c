@@ -10,13 +10,41 @@
 #include <linux/kmod.h>
 #include <linux/fs.h>
 
+#include <linux/sched.h>
+
 MODULE_LICENSE("GPL");
 
-int my_wait(int *status)
+static struct task_struct *task;
+
+extern pid_t kernel_clone(struct kernel_clone_args *args);
+extern struct filename *getname_kernel(const char *filename);
+extern long do_wait(struct wait_opts *wo);
+extern int do_execve(struct filename *filename, const char __user *const __user *__argv, const char __user *const __user *__envp);
+
+int my_wait(pid_t pid)
 {
-	// wait for child process to terminate
-	// todo
-	return 0;
+	int status;
+	int a;
+
+	struct wait_opts wo;
+	struct pid *wo_pid = NULL;
+	enum pid_type type;
+	type = PIDTYPE_PID;
+
+	wo_pid = find_get_pid(pid);
+
+	wo.wo_type = type;
+	wo.wo_pid = wo_pid;
+	wo.wo_flags = WEXITED | WUNTRACED;
+	wo.wo_info = NULL;
+	wo.wo_stat = (int __user *)&status;
+	// wo.wo_stat = -1;
+	wo.wo_rusage = NULL;
+
+	do_wait(&wo);
+	put_pid(wo_pid);
+
+	return (wo.wo_stat);
 }
 
 int my_exec(void)
@@ -27,7 +55,7 @@ int my_exec(void)
 }
 
 // implement fork function
-int my_fork(void *argc) // 实现fork函数
+int my_fork(void *argc)
 {
 
 	// set default sigaction for current process
@@ -46,33 +74,31 @@ int my_fork(void *argc) // 实现fork函数
 
 	/* fork a process using kernel_clone or kernel_thread */
 	// todo
-	pid = kernel_clone(my_fork, NULL, SIGCHLD | CLONE_FS | CLONE_FILES | CLONE_SIGHAND | CLONE_VM, NULL);
+	struct kernel_clone_args args = {
+		.flags = CLONE_FS | CLONE_FILES | CLONE_SIGHAND | CLONE_VM,
+	};
+	pid = kernel_clone(&args);
 	printk("[program2] : The child process has pid = %ld\n", pid);
 	printk("[program2] : This is the parent process, pid = %d\n", (int)current->pid);
 
 	/* execute a test program in child process */
 	// todo
-	my_exec();
 
 	/* wait until child process terminates */
-	my_wait((pid_t)pid);
-
-	return 0;
+	int status = my_wait(pid);
 }
 
 static int __init program2_init(void)
 {
-	// 模块初始化函数
 	printk("[program2] : module_init\n");
 	printk("[program2] : module_init create kthread start\n");
 
 	/* create a kernel thread to run my_fork */
-	// 创建一个内核线程来运行my_fork函数
 	task = kthread_create(&my_fork, NULL, "Mythread");
 	if (!IS_ERR(task))
 	{
 		printk("[program2] : module_init Kthread starts\n");
-		wake_up_process(task); // 唤醒内核线程
+		wake_up_process(task);
 	}
 
 	return 0;
@@ -80,7 +106,6 @@ static int __init program2_init(void)
 
 static void __exit program2_exit(void)
 {
-	// 模块退出函数
 	printk("[program2] : Module_exit\n");
 }
 
