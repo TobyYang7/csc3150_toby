@@ -1,0 +1,11 @@
+Process start to fork
+I'm the Parent Process, my pid = 4903
+I'm the Child Process, my pid = 4904
+Child process start to execute test program:
+
+------------CHILD PROCESS START-----------
+This is the normal program
+
+------------CHILD PROCESS END-----------
+Parent process receives SIGCHLD signal
+Normal termination with EXIT STATUS = 0

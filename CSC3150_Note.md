@@ -69,7 +69,8 @@
         5.  ready: 进程正在等待I/O设备的数据，当I/O设备准备好数据后，会发送一个中断信号给CPU，CPU会暂停当前的工作，转而去处理I/O设备的数据
         6.  terminated: 进程已经执行完毕
     5. **Process Creation:**
-       1. functions: ```pid_t fork(void);```
-       2. 
+       1. A process may create several new processes, via a create-process system call, during the course of execution.
+       2. Tree of processes: ![Alt text](image-5.png)
+       3. *Q* 为什么会有processes tree: 为了方便管理进程，方便资源的分配和回收；进程树以树的结构来表示，既能够简化进程间的关系，也方便了操作系统和应用程序对进程进行分析和管理。
 11. 存储管理：
 12. 文件管理：
