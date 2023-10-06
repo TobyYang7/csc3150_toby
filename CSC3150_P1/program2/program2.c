@@ -10,7 +10,21 @@
 #include <linux/kmod.h>
 #include <linux/fs.h>
 
-MODULE_LICENSE("GPL"); // 模块许可证
+MODULE_LICENSE("GPL");
+
+int my_wait(int *status)
+{
+	// wait for child process to terminate
+	// todo
+	return 0;
+}
+
+int my_exec(void)
+{
+	// execute a test program in child process
+	// todo
+	return 0;
+}
 
 // implement fork function
 int my_fork(void *argc) // 实现fork函数
@@ -27,6 +41,7 @@ int my_fork(void *argc) // 实现fork函数
 		sigemptyset(&k_action->sa.sa_mask); // 清空信号屏蔽字
 		k_action++;
 	}
+
 	long pid;
 
 	/* fork a process using kernel_clone or kernel_thread */
@@ -37,9 +52,10 @@ int my_fork(void *argc) // 实现fork函数
 
 	/* execute a test program in child process */
 	// todo
+	my_exec();
 
 	/* wait until child process terminates */
-	// todo
+	my_wait((pid_t)pid);
 
 	return 0;
 }
