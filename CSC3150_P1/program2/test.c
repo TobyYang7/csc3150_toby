@@ -2,11 +2,12 @@
 #include <stdio.h>
 #include <signal.h>
 
-int main(int argc,char* argv[]){
-	int i=0;
+int main(int argc, char *argv[])
+{
+	int i = 0;
 
 	printf("--------USER PROGRAM--------\n");
-//	alarm(2);
+	//	alarm(2);
 	raise(SIGBUS);
 	sleep(5);
 	printf("user process success!!\n");
