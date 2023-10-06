@@ -20,13 +20,13 @@ int main(int argc, char *argv[])
     {
         if (pid == 0) // If pid is 0, this is the child process
         {
-            // sleep(1); // Uncomment this line to add a delay of 1 second
+            // sleep(1);                                                      // Uncomment this line to add a delay of 1 second
             printf("Child process pid:%d ppid:%d\n", getpid(), getppid()); // Print the child process ID and parent process ID to the console
             exit(0);                                                       // Terminate the child process with a success code
         }
         else // Otherwise, this is the parent process
         {
-            sleep(3);                                    // Add a delay of 3 seconds
+            // sleep(3);                                    // Add a delay of 3 seconds
             printf("Parent process pid:%d\n", getpid()); // Print the parent process ID to the console
             exit(0);                                     // Terminate the parent process with a success code
         }

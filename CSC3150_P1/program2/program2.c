@@ -10,47 +10,63 @@
 #include <linux/kmod.h>
 #include <linux/fs.h>
 
-MODULE_LICENSE("GPL");
+MODULE_LICENSE("GPL"); // 模块许可证
 
+// implement fork function
+int my_fork(void *argc) // 实现fork函数
+{
 
-//implement fork function
-int my_fork(void *argc){
-	
-	
-	//set default sigaction for current process
+	// set default sigaction for current process
 	int i;
 	struct k_sigaction *k_action = &current->sighand->action[0];
-	for(i=0;i<_NSIG;i++){
-		k_action->sa.sa_handler = SIG_DFL;
-		k_action->sa.sa_flags = 0;
-		k_action->sa.sa_restorer = NULL;
-		sigemptyset(&k_action->sa.sa_mask);
+	for (i = 0; i < _NSIG; i++)
+	{
+		k_action->sa.sa_handler = SIG_DFL;	// 设置信号处理程序为默认值
+		k_action->sa.sa_flags = 0;			// 设置标志为0
+		k_action->sa.sa_restorer = NULL;	// 设置恢复程序为NULL
+		sigemptyset(&k_action->sa.sa_mask); // 清空信号屏蔽字
 		k_action++;
 	}
-	
+	long pid;
+
 	/* fork a process using kernel_clone or kernel_thread */
-	
+	// todo
+	pid = kernel_clone(my_fork, NULL, SIGCHLD | CLONE_FS | CLONE_FILES | CLONE_SIGHAND | CLONE_VM, NULL);
+	printk("[program2] : The child process has pid = %ld\n", pid);
+	printk("[program2] : This is the parent process, pid = %d\n", (int)current->pid);
+
 	/* execute a test program in child process */
-	
+	// todo
+
 	/* wait until child process terminates */
-	
+	// todo
+
 	return 0;
 }
 
-static int __init program2_init(void){
+static int __init program2_init(void)
+{
+	// 模块初始化函数
+	printk("[program2] : module_init\n");
+	printk("[program2] : module_init create kthread start\n");
 
-	printk("[program2] : Module_init\n");
-	
-	/* write your code here */
-	
 	/* create a kernel thread to run my_fork */
-	
+	// 创建一个内核线程来运行my_fork函数
+	task = kthread_create(&my_fork, NULL, "Mythread");
+	if (!IS_ERR(task))
+	{
+		printk("[program2] : module_init Kthread starts\n");
+		wake_up_process(task); // 唤醒内核线程
+	}
+
 	return 0;
 }
 
-static void __exit program2_exit(void){
+static void __exit program2_exit(void)
+{
+	// 模块退出函数
 	printk("[program2] : Module_exit\n");
 }
 
-module_init(program2_init);
-module_exit(program2_exit);
+module_init(program2_init); // 模块初始化函数
+module_exit(program2_exit); // 模块退出函数
