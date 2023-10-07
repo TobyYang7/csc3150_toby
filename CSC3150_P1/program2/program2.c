@@ -168,7 +168,6 @@ int my_fork(void *argc)
 		printk("[program2] : get SIGSEGV signal\n");
 	}
 
-	// stop.c
 	else if (my_WIFSTOPPED(status))
 	{
 		printk("[program2] : get SIGSTOP signal\n");
