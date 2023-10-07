@@ -32,15 +32,24 @@ extern struct filename *getname_kernel(const char *filename);
 extern long do_wait(struct wait_opts *wo);
 extern int do_execve(struct filename *filename, const char __user *const __user *__argv, const char __user *const __user *__envp);
 
+int my_WIFEXITED(int status)
+{
+	return (status & 0xff) == 0;
+}
+
+int my_WIFSTOPPED(int status)
+{
+	return ((status) & 0xff) == 0x7f;
+}
+
 int my_wait(pid_t pid)
 {
 	struct wait_opts wo;
 	struct pid *wo_pid = NULL;
 	enum pid_type type;
+
 	type = PIDTYPE_PID;
-
 	wo_pid = find_get_pid(pid); // Look up the pid from hash table and return with it's count evaluated
-
 	wo.wo_type = type;
 	wo.wo_pid = wo_pid;
 	wo.wo_flags = WEXITED | WUNTRACED;
@@ -51,7 +60,7 @@ int my_wait(pid_t pid)
 	do_wait(&wo);
 	put_pid(wo_pid); // Decrease the count and free memory
 
-	return (wo.wo_stat); // do_wait returns the status of the child process
+	return wo.wo_stat;
 }
 
 int my_exec(void)
@@ -99,53 +108,87 @@ int my_fork(void *argc)
 
 	printk("[program2] : child process");
 
+	// abort.c
 	if (status == 6)
 	{
 		printk("[program2] : get SIGABRT signal\n");
 	}
+
+	// alarm.c
 	else if (status == 14)
 	{
 		printk("[program2] : get SIGALRM signal\n");
 	}
+
+	// bus.c
 	else if (status == 7)
 	{
 		printk("[program2] : get SIGBUS signal\n");
 	}
+
+	// floating.c
 	else if (status == 8)
 	{
 		printk("[program2] : get SIGFPE signal\n");
 	}
-	else if (status == 1)
-	{
-		printk("[program2] : get SIGHUP signal\n");
-	}
+
+	// illegal_isntr.c
 	else if (status == 4)
 	{
 		printk("[program2] : get SIGILL signal\n");
 	}
-	else if (status == 2)
-	{
-		printk("[program2] : get SIGINT signal\n");
-	}
+
+	// kill.c
 	else if (status == 9)
 	{
 		printk("[program2] : get SIGKILL signal\n");
 	}
+
+	// normal.c
+	else if (my_WIFEXITED(status))
+	{
+		printk("[program2] : Normal termination\n");
+	}
+
+	// pipe.c
 	else if (status == 13)
 	{
 		printk("[program2] : get SIGPIPE signal\n");
 	}
+
+	// quit.c
+	else if (status == 3)
+	{
+		printk("[program2] : get SIGQUIT signal\n");
+	}
+
+	// segment_fault.c
 	else if (status == 11)
 	{
 		printk("[program2] : get SIGSEGV signal\n");
 	}
+
+	// stop.c
+	else if (my_WIFSTOPPED(status))
+	{
+		printk("[program2] : get SIGSTOP signal\n");
+	}
+
+	// terminate.c
 	else if (status == 15)
 	{
 		printk("[program2] : get SIGTERM signal\n");
 	}
+
+	// trap.c
 	else if (status == 5)
 	{
 		printk("[program2] : get SIGTRAP signal\n");
+	}
+
+	else
+	{
+		printk("[program2] : get UNKOWN signal\n");
 	}
 
 	printk("[program2] : The return signal is %d\n", status);

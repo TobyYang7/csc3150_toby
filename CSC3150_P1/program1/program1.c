@@ -59,6 +59,11 @@ void check_termination(int status)
 		{
 			printf("child process get SIGPIPE signal");
 		}
+		// quit.c
+		else if (WTERMSIG(status) == SIGQUIT)
+		{
+			printf("child process get SIGQUIT signal");
+		}
 		// segment_fault.c
 		else if (WTERMSIG(status) == SIGSEGV)
 		{
