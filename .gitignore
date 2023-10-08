@@ -3,6 +3,7 @@
 .vscode/settings.json
 *.pptx
 *.cmd
+*.o
 CSC3150_P1/program2/.modules.order.cmd
 CSC3150_P1/program2/.program2.mod.cmd
 CSC3150_P1/program2/.program2.o.cmd
