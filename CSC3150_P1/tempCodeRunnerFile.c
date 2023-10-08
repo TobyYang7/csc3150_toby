@@ -1,11 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <dirent.h>
-#include <sys/types.h>
-
-#define MAX_DEPTH 100
-
 // Function to recursively print the process tree
 void printProcessTree(pid_t pid, int depth)
 {
@@ -74,11 +66,4 @@ void printProcessTree(pid_t pid, int depth)
     }
 
     closedir(dir);
-}
-
-int main()
-{
-    printf("System\n");
-    printProcessTree(1, 1); // Start with the init process (PID 1) at depth 1
-    return 0;
 }

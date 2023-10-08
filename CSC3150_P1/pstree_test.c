@@ -120,6 +120,8 @@ void display_tree(Process *proc, int depth, int last_siblings[], int flags)
     }
     if (flags == 0)
     {
+        // printf("%d ", proc->pid);
+        // printf("%d ", depth);
         printf("%s \n", proc->name);
     }
     else if (flags == 1)
