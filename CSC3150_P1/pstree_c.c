@@ -15,15 +15,15 @@ typedef struct
     pid_t pid;
     char name[MAX_NAME_LEN];
     bool have_child;
-} ChildProcess;
+} Node;
 
 /**
  * Reads all threads for a given process ID and stores them in the threads array.
- * @param pid The process ID for which to read threads.
+ * @param pid Tqhe process ID for which to read threads.
  * @param threads Array to store thread information.
  * @param thread_count Pointer to an integer to store the number of threads.
  */
-void readThreadsInProc(pid_t pid, ChildProcess *threads, int *thread_count)
+void readThreadsInProc(pid_t pid, Node *threads, int *thread_count)
 {
     char proc_path[MAX_NAME_LEN];
     snprintf(proc_path, sizeof(proc_path), "/proc/%ld/task", (long)pid);
@@ -90,26 +90,26 @@ void print_spaces(int depth, int is_last_child, int *sibling_map)
     {
         if (is_last_child)
         {
-            printf("└─");
+            printf("└──");
             sibling_map[depth - 1] = 0;
         }
         else
         {
-            printf("├─");
+            printf("├──");
             sibling_map[depth - 1] = 1;
         }
     }
 }
 
 /**
- * Compare function for sorting ChildProcess array by name.
- * @param a Pointer to first ChildProcess struct.
- * @param b Pointer to second ChildProcess struct.
+ * Compare function for sorting Node array by name.
+ * @param a Pointer to first Node struct.
+ * @param b Pointer to second Node struct.
  * @return Negative value if a should come before b, positive value if a should come after b, 0 if equal.
  */
 int compareChildProcess(const void *a, const void *b)
 {
-    return strcmp(((ChildProcess *)a)->name, ((ChildProcess *)b)->name);
+    return strcmp(((Node *)a)->name, ((Node *)b)->name);
 }
 
 /**
@@ -125,7 +125,7 @@ void printProcessTreeDFS(pid_t pid, int depth, int is_last_child, int *sibling_m
     int len = 0; // Length of the last process name printed
     bool have_child = false;
 
-    ChildProcess threads[MAX_NAME_LEN];
+    Node threads[MAX_NAME_LEN];
     int thread_count = 0;
 
     // Get process information from the status file in /proc
@@ -148,7 +148,7 @@ void printProcessTreeDFS(pid_t pid, int depth, int is_last_child, int *sibling_m
     }
 
     print_spaces(depth, is_last_child, sibling_map);
-    printf("%s\n", proc_name);
+    printf("%s", proc_name);
 
     // Traverse child processes
     DIR *dir = opendir("/proc");
@@ -159,7 +159,7 @@ void printProcessTreeDFS(pid_t pid, int depth, int is_last_child, int *sibling_m
     }
 
     struct dirent *entry;
-    ChildProcess children[MAX_NAME_LEN];
+    Node children[MAX_NAME_LEN];
     int child_count = 0;
 
     while ((entry = readdir(dir)))
@@ -198,18 +198,8 @@ void printProcessTreeDFS(pid_t pid, int depth, int is_last_child, int *sibling_m
 
     closedir(dir);
 
-    // Traversal threads
-    readThreadsInProc(pid, threads, &thread_count);
-    for (int i = 1; i < thread_count; i++)
-    {
-        print_spaces(depth + 1, i == thread_count - 1, sibling_map);
-        // printf("proc: %s ", proc_name);
-        // printf("thread: %s_%d", threads[i].name, i);
-        printf("{%s}\n", threads[i].name);
-    }
-
     // Sort child processes for alphabet ordering
-    qsort(children, child_count, sizeof(ChildProcess), compareChildProcess);
+    qsort(children, child_count, sizeof(Node), compareChildProcess);
 
     // Recursively print the tree for each child process
     for (int i = 0; i < child_count; i++)

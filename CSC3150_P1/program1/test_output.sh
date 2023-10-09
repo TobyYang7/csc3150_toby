@@ -1,0 +1,17 @@
+make all
+cd /home/seed/csc3150_toby/CSC3150_P1/program1
+./program1 ./abort
+./program1 ./alarm
+./program1 ./bus
+./program1 ./floating
+./program1 ./hangup
+./program1 ./illegal_instr
+./program1 ./interrupt
+./program1 ./kill
+./program1 ./normal
+./program1 ./pipe
+./program1 ./quit
+./program1 ./segment_fault
+./program1 ./stop
+./program1 ./terminate
+./program1 ./trap

@@ -93,7 +93,6 @@ void check_termination(int status)
 
 int main(int argc, char *argv[])
 {
-
 	/* fork a child process */
 	pid_t pid;
 	int status;
@@ -141,4 +140,5 @@ int main(int argc, char *argv[])
 			check_termination(status);
 		}
 	}
+	printf("\n");
 }
