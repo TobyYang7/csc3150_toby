@@ -5,12 +5,13 @@
 int main(int argc, char *argv[])
 {
 	int i = 0;
+	return 0;
 
-	printf("--------USER PROGRAM--------\n");
-	//	alarm(2);
-	raise(SIGSTOP);
-	sleep(5);
-	printf("user process success!!\n");
-	printf("--------USER PROGRAM--------\n");
-	return 100;
+	// printf("--------USER PROGRAM--------\n");
+	// //	alarm(2);
+	// raise(SIGSTOP);
+	// sleep(5);
+	// printf("user process success!!\n");
+	// printf("--------USER PROGRAM--------\n");
+	// return 100;
 }
