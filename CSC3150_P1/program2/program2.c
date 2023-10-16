@@ -12,7 +12,7 @@
 
 MODULE_LICENSE("GPL");
 
-const char TEST_PATH[] = "/home/seed/csc3150_toby/CSC3150_P1/program2/test";
+const char TEST_PATH[] = "/tmp/test";
 static struct task_struct *thread;
 
 struct wait_opts
@@ -60,7 +60,12 @@ int my_wait(pid_t pid)
 	do_wait(&wo);
 	put_pid(wo_pid); // Decrease the count and free memory
 
-	return wo.wo_stat;
+	if (my_WIFEXITED(wo.wo_stat))
+		return 0;
+	else if (my_WIFSTOPPED(wo.wo_stat))
+		return 19;
+	else
+		return wo.wo_stat;
 }
 
 int my_exec(void)
@@ -145,7 +150,7 @@ int my_fork(void *argc)
 	}
 
 	// normal.c
-	else if (my_WIFEXITED(status))
+	else if (status == 0)
 	{
 		printk("[program2] : Normal termination\n");
 	}
@@ -168,7 +173,7 @@ int my_fork(void *argc)
 		printk("[program2] : get SIGSEGV signal\n");
 	}
 
-	else if (my_WIFSTOPPED(status))
+	else if (status == 19)
 	{
 		printk("[program2] : get SIGSTOP signal\n");
 	}
