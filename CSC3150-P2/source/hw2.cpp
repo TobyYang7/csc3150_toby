@@ -10,6 +10,11 @@
 
 #define ROW 10
 #define COLUMN 50
+#define LOG_LENGTH 15
+
+bool game_status = true;
+pthread_mutex_t frog_thread;
+pthread_mutex_t log_thread;
 
 struct Node
 {
@@ -53,17 +58,18 @@ int kbhit(void)
 void *logs_move(void *t)
 {
 
-	/*  Move the logs  */
+	/*  todo: Move the logs  */
 
-	/*  Check keyboard hits, to change frog's position or quit the game. */
+	/*  todo: Check keyboard hits, to change frog's position or quit the game. */
 
-	/*  Check game's status  */
+	/*  todo: Check game's status  */
 
-	/*  Print the map on the screen  */
+	/*  todo: Print the map on the screen  */
 }
 
 int main(int argc, char *argv[])
 {
+	srand(time(NULL));
 
 	// Initialize the river map and frog's starting position
 	memset(map, 0, sizeof(map));
@@ -87,9 +93,13 @@ int main(int argc, char *argv[])
 	for (i = 0; i <= ROW; ++i)
 		puts(map[i]);
 
-	/*  Create pthreads for wood move and frog control.  */
+	/*  todo: Create pthreads for wood move and frog control.  */
+	pthread_mutex_init(&frog_thread, NULL);
+	pthread_mutex_init(&log_thread, NULL);
 
-	/*  Display the output for user: win, lose or quit.  */
+	// todo: initialize the logs
+
+	/*  todo: Display the output for user: win, lose or quit.  */
 
 	return 0;
 }

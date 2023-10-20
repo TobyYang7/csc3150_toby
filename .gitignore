@@ -1,9 +1,8 @@
-.vscode/c_cpp_properties.json
-.vscode/launch.json
-.vscode/settings.json
+.vscode
 *.pptx
 *.cmd
 *.o
+*.out
 CSC3150_P1/program2/.modules.order.cmd
 CSC3150_P1/program2/.program2.mod.cmd
 CSC3150_P1/program2/.program2.o.cmd
@@ -11,3 +10,7 @@ CSC3150_P1/program2/modules.order
 CSC3150_P1/program2/p2.c
 CSC3150_P1/program2/program2.mod
 CSC3150_P1/program2/program2.o
+.gitattributes
+.history
+.vscode
+*.zip
