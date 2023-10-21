@@ -89,6 +89,14 @@ int main(int argc, char *argv[])
 	frog = Node(ROW, (COLUMN - 1) / 2);
 	map[frog.x][frog.y] = '0';
 
+	// Initialize the log position
+	for (i = 1; i < ROW; i += 1)
+	{
+		int log_start = rand() % (COLUMN - LOG_LENGTH);
+		for (j = log_start; j < log_start + LOG_LENGTH; ++j)
+			map[i][j] = '=';
+	}
+
 	// Print the map into screen
 	for (i = 0; i <= ROW; ++i)
 		puts(map[i]);
@@ -96,8 +104,6 @@ int main(int argc, char *argv[])
 	/*  todo: Create pthreads for wood move and frog control.  */
 	pthread_mutex_init(&frog_thread, NULL);
 	pthread_mutex_init(&log_thread, NULL);
-
-	// todo: initialize the logs
 
 	/*  todo: Display the output for user: win, lose or quit.  */
 
