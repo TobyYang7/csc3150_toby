@@ -3,14 +3,15 @@
 
 #include <pthread.h>
 
-
-typedef struct my_item {
+typedef struct my_item
+{
   /* TODO: More stuff here, maybe? */
   struct my_item *next;
   struct my_item *prev;
 } my_item_t;
 
-typedef struct my_queue {
+typedef struct my_queue
+{
   int size;
   my_item_t *head;
   pthread_mutex_t mutex;
