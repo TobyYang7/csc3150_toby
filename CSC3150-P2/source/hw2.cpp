@@ -10,7 +10,7 @@
 #define ROW 10
 #define COLUMN 50
 #define LOG_LENGTH 15
-#define SLEEP 100000
+#define SLEEP 70000
 
 bool game_status = true;
 bool win = false;
