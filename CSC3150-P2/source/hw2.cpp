@@ -77,7 +77,7 @@ int kbhit(void)
     return 0;
 }
 
-void *logs_move(void *t)
+void *logs_move(void *arg)
 {
     while (game_status)
     {
@@ -107,7 +107,7 @@ void *logs_move(void *t)
     return NULL;
 }
 
-void *frog_move(void *t)
+void *frog_move(void *arg)
 {
     while (game_status)
     {

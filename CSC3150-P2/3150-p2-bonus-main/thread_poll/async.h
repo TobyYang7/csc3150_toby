@@ -3,23 +3,20 @@
 
 #include <pthread.h>
 
-// the task struct
 typedef struct my_item
 {
-
+  void (*handler)(int);
+  int args;
   struct my_item *next;
   struct my_item *prev;
-  void (*taskFunction)(int);
-  int args;
-
 } my_item_t;
 
 typedef struct my_queue
 {
-
   int size;
   my_item_t *head;
-
+  pthread_mutex_t mutex;
+  pthread_cond_t cond;
 } my_queue_t;
 
 void async_init(int);

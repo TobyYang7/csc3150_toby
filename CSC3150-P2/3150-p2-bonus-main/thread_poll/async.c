@@ -4,89 +4,77 @@
 #include "utlist.h"
 #include <stdio.h>
 
-// an array of threads
+my_queue_t *job_queue;
+int global_thread_count = 0;
 
-my_queue_t *work_q_pt;
-pthread_mutex_t mutexQueue;
-pthread_cond_t condQueue;
-
-int thread_count = 0;
-
-void *startThread(void *args)
+void *worker_thread(void *arg)
 {
-    thread_count++;
-    int local_num = thread_count;
-    printf("start %d\n", thread_count);
+    global_thread_count++;
+    int local_count = global_thread_count;
+    printf("\nStarting Thread Number: %d\n", global_thread_count);
+    pthread_t current_thread_id = pthread_self();
+    printf("Thread ID %lu: Initializing...\n", current_thread_id);
+
     while (1)
     {
-        my_item_t *task;
-        pthread_mutex_lock(&mutexQueue);
-        while (work_q_pt->size == 0)
-        {
-            pthread_cond_wait(&condQueue, &mutexQueue);
-            printf("thread %d condition wait\n", local_num);
-        }
-        task = work_q_pt->head;
-        DL_DELETE(work_q_pt->head, work_q_pt->head);
-        work_q_pt->size--;
-        pthread_mutex_unlock(&mutexQueue);
+        pthread_mutex_lock(&job_queue->mutex);
 
-        printf("task.args = %d\n", task->args);
-        printf("task.taskFunction = %d\n", (task->taskFunction));
-        task->taskFunction(task->args);
-        printf("done...\n");
+        if (job_queue->head == NULL)
+        {
+            printf("Thread ID %lu: No jobs in the queue, waiting...\n", current_thread_id);
+        }
+
+        while (job_queue->head == NULL)
+        {
+            pthread_cond_wait(&job_queue->cond, &job_queue->mutex);
+        }
+
+        my_item_t *job = job_queue->head;
+        DL_DELETE(job_queue->head, job);
+
+        pthread_mutex_unlock(&job_queue->mutex);
+
+        if (job != NULL)
+        {
+            printf("Thread ID %lu: Processing a job...\n", current_thread_id);
+            job->handler(job->args);
+            free(job);
+            printf("Thread ID %lu: Completed the job.\n", current_thread_id);
+            printf("=======================================\n");
+        }
     }
+    return NULL;
 }
 
 void async_init(int num_threads)
 {
-    /** TODO: create num_threads threads and initialize the thread pool **/
-    my_queue_t queue = {
-        .head = NULL,
-        .size = 0};
-    work_q_pt = (my_queue_t *)malloc(sizeof(queue));
-    work_q_pt->head = NULL;
-    work_q_pt->size = 0;
+    job_queue = malloc(sizeof(my_queue_t));
+    job_queue->size = 0;
+    job_queue->head = NULL;
+    pthread_mutex_init(&job_queue->mutex, NULL);
+    pthread_cond_init(&job_queue->cond, NULL);
 
-    pthread_mutex_init(&mutexQueue, NULL);
-    pthread_cond_init(&condQueue, NULL);
-
-    pthread_t threads[num_threads];
+    printf("Initializing with %d threads...\n", num_threads);
     for (int i = 0; i < num_threads; i++)
     {
-        int rc = pthread_create(&threads[i], NULL, &startThread, NULL);
-        if (rc)
-        {
-            printf("Failed to create pthread %d\n", i);
-        }
+        pthread_t thread;
+        pthread_create(&thread, NULL, worker_thread, NULL);
+        printf("Thread %d has been created.\n", i + 1);
     }
-
-    return;
+    printf("All threads initialized.\n");
 }
 
-void async_run(void (*hanlder)(int), int args)
+void async_run(void (*handler)(int), int args)
 {
-    // hanlder(args);
-    my_item_t it = {
-        .args = args,
-        .next = NULL,
-        .prev = NULL,
-        .taskFunction = hanlder};
-    my_item_t *it_pt;
-    it_pt = (my_item_t *)malloc(sizeof(it));
-    it_pt->args = args;
-    it_pt->next = NULL;
-    it_pt->prev = NULL;
-    it_pt->taskFunction = hanlder;
-    printf("item args = %d\n", it_pt->args);
-    printf("item taskFunction = %d\n", (it_pt->taskFunction));
-    pthread_mutex_lock(&mutexQueue);
-    printf("enqueue    queue.size = %d \n", work_q_pt->size);
-    DL_APPEND(work_q_pt->head, it_pt);
-    work_q_pt->size++;
-    pthread_mutex_unlock(&mutexQueue);
+    my_item_t *job = malloc(sizeof(my_item_t));
+    job->handler = handler;
+    job->args = args;
 
-    pthread_cond_signal(&condQueue);
-
-    return;
+    pthread_mutex_lock(&job_queue->mutex);
+    DL_APPEND(job_queue->head, job);
+    int jobs_in_queue;
+    DL_COUNT(job_queue->head, job, jobs_in_queue);
+    printf("Added a new job. Total jobs in queue: %d\n", jobs_in_queue);
+    pthread_cond_signal(&job_queue->cond);
+    pthread_mutex_unlock(&job_queue->mutex);
 }
