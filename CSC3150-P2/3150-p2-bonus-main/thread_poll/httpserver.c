@@ -184,6 +184,8 @@ struct fd_pair
 {
     int *read_fd;
     int *write_fd;
+    pthread_cond_t *cond;
+    int *finished;
     char *type;
     unsigned long id;
 };
@@ -194,13 +196,22 @@ void *relay_message(void *endpoints)
 
     char buffer[4096];
     int read_ret, write_ret;
-    // printf("%s thread %lu start to work\n", pair->type, pair->id);
+    printf("%s thread %lu start to work\n", pair->type, pair->id);
     while ((read_ret = read(*pair->read_fd, buffer, sizeof(buffer) - 1)) > 0)
     {
         write_ret = http_send_data(*pair->write_fd, buffer, read_ret);
         if (write_ret < 0)
             break;
     }
+
+    if (read_ret <= 0)
+        printf("%s thread %lu read failed, status %d\n", pair->type, pair->id, read_ret);
+    if (write_ret <= 0)
+        printf("%s thread %lu write failed, status %d\n", pair->type, pair->id, write_ret);
+
+    *pair->finished = 1; // fix
+    pthread_cond_signal(pair->cond);
+
     printf("%s thread %lu exited\n", pair->type, pair->id);
     return NULL;
 }
@@ -221,24 +232,39 @@ void proxy_request_handler(int req_fd)
     printf("Thread %lu will handle proxy request %lu.\n", pthread_self(), local_id);
 
     struct fd_pair pairs[2];
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
+    int finished = 0;
+    pthread_mutex_init(&mutex, NULL);
+    pthread_cond_init(&cond, NULL);
+
     pairs[0].read_fd = &req_fd;
     pairs[0].write_fd = &target_fd;
+    pairs[0].finished = &finished;
     pairs[0].type = "request";
+    pairs[0].cond = &cond;
     pairs[0].id = local_id;
 
     pairs[1].read_fd = &target_fd;
     pairs[1].write_fd = &req_fd;
+    pairs[1].finished = &finished;
     pairs[1].type = "response";
+    pairs[1].cond = &cond;
     pairs[1].id = local_id;
 
     pthread_t threads[2];
     pthread_create(threads, NULL, relay_message, pairs);
     pthread_create(threads + 1, NULL, relay_message, pairs + 1);
-    pthread_join(threads[0], NULL);
-    pthread_join(threads[1], NULL);
+
+    if (!finished)
+        pthread_cond_wait(&cond, &mutex);
 
     close(req_fd);
     close(target_fd);
+
+    pthread_mutex_destroy(&mutex);
+    pthread_cond_destroy(&cond);
+
     printf("Socket closed, proxy request %lu finished.\n\n", local_id);
 }
 
@@ -327,7 +353,7 @@ void signal_callback_handler(int signum)
 }
 
 char *USAGE =
-    "Usage: ./httpserver --files files/ --port 8000 [--num-threads 5]\n"
+    "Usage: ./httpserver --files www_directory/ --port 8000 [--num-threads 5]\n"
     "       ./httpserver --proxy inst.eecs.berkeley.edu:80 --port 8000 [--num-threads 5]\n";
 
 void exit_with_usage()
@@ -424,7 +450,7 @@ int main(int argc, char **argv)
     {
         request_handler = proxy_request_handler;
     }
-    printf("get here");
+
     async_init(num_threads);
 
     serve_forever(&server_fd, request_handler);
