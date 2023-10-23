@@ -40,7 +40,6 @@ void *worker_thread(void *arg)
             job->handler(job->args);
             free(job);
             printf("Thread ID %lu: Completed the job.\n", current_thread_id);
-            printf("=======================================\n");
         }
     }
     return NULL;

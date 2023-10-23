@@ -9,6 +9,8 @@ typedef struct my_item
   int args;
   struct my_item *next;
   struct my_item *prev;
+  pthread_mutex_t mutex;
+  pthread_cond_t cond;
 } my_item_t;
 
 typedef struct my_queue
