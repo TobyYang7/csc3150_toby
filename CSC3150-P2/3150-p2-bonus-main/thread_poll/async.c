@@ -13,7 +13,7 @@ void *worker_thread(void *arg)
     int local_count = global_thread_count;
     printf("\nStarting Thread Number: %d\n", global_thread_count);
     pthread_t current_thread_id = pthread_self();
-    printf("Thread ID %lu: Initializing...\n", current_thread_id);
+    printf("[  Thread ID %lu:  ] Initializing...\n", current_thread_id);
 
     while (1)
     {
@@ -21,7 +21,7 @@ void *worker_thread(void *arg)
 
         if (job_queue->head == NULL)
         {
-            printf("Thread ID %lu: No jobs in the queue, waiting...\n", current_thread_id);
+            printf("[  Thread ID %lu:  ] No jobs in the queue, waiting...\n", current_thread_id);
         }
 
         while (job_queue->head == NULL)
@@ -36,10 +36,10 @@ void *worker_thread(void *arg)
 
         if (job != NULL)
         {
-            printf("Thread ID %lu: Processing a job...\n", current_thread_id);
+            printf("[  Thread ID %lu:  ] Processing a job...\n", current_thread_id);
             job->handler(job->args);
             free(job);
-            printf("Thread ID %lu: Completed the job.\n", current_thread_id);
+            printf("[  Thread ID %lu:  ] Completed the job.\n", current_thread_id);
         }
     }
     return NULL;
