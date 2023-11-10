@@ -1,0 +1,10 @@
+*** Now run 'gdb' in another window.
+
+xv6 kernel is booting
+
+init: starting sh
+$ bigfile
+..
+wrote 268 blocks
+bigfile: file is too small
+$ qemu-system-riscv64: terminating on signal 15 from pid 14294 (make)
