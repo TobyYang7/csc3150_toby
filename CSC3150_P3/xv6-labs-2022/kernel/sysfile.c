@@ -260,36 +260,39 @@ sys_mmap(void)
   struct file *mfile;
   struct proc *p = myproc();
 
-  // receive argument
+  // fetch argument
   argint(1, &length);
   argint(2, &prot);
   argint(3, &flags);
   argfd(4, &fd, &mfile);
   argint(5, &offset);
 
-  // argument error
-  if (length < 0 || prot < 0 || flags < 0 || fd < 0 || offset < 0 || (!mfile->writable && (prot & PROT_WRITE) && (flags & MAP_SHARED)))
+  // value invalid
+  if (length < 0 || prot < 0 || flags < 0 || fd < 0 || offset < 0)
+    return -1;
+  // permission/flags conflict
+  if (!mfile->writable && (prot & PROT_WRITE) && (flags & MAP_SHARED))
     return -1;
 
-  // find free vma
-  // virtual mem area: vma[VMASIZE];
+  // find a free vma to map file
   idx = 0;
-  struct vma *current = &(p->vma[idx]);
-  while (current)
+  while (idx < VMASIZE)
   {
-    if (current->length == 0)
+    if (p->vma[idx].length == 0) // free vma
     {
-      current->length = length;
-      current->addr = &(p->sz); // uint64 sz: Size of process memory (bytes)
-      current->prot = prot;
-      current->flags = flags;
-      current->offset = offset;
-      current->mfile = filedup(mfile);
-      length = PGROUNDUP(length);
+      p->vma[idx].addr = (void *)p->sz;
+      p->vma[idx].length = length;
+      p->vma[idx].prot = prot;
+      p->vma[idx].flags = flags;
+      p->vma[idx].fd = fd;
+      p->vma[idx].offset = offset;
+      p->vma[idx].mfile = filedup(mfile);
       p->sz += length;
-      return current->addr;
+      return (uint64)p->vma[idx].addr;
     }
+    idx++;
   }
+  // no available vma
   return -1;
 }
 

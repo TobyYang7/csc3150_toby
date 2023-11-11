@@ -15,4 +15,4 @@ CSC3150_P1/program2/program2.o
 .vscode
 *.zip
 *.o
-*.history
+.history
