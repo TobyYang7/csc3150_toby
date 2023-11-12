@@ -78,7 +78,10 @@ void usertrap(void)
 
     // check mem
     if (mem == 0)
+    {
+      printf("usertrap(): out of memory\n");
       goto err;
+    }
 
     // find vma
     for (int i = 0; i < VMASIZE; i++)
@@ -95,7 +98,10 @@ void usertrap(void)
     // printf("usertrap(): off %d\n", va - p->vma[idx].addr + p->vma[idx].offset);
     // if not found, kill the process
     if (idx == -1)
+    {
+      printf("usertrap(): invalid memory access\n");
       goto err;
+    }
 
     else
     {
@@ -106,6 +112,7 @@ void usertrap(void)
       if (mappages(p->pagetable, PGROUNDDOWN(va), PGSIZE, (uint64)mem, PTE_W | PTE_X | PTE_R | PTE_U) != 0)
       {
         kfree(mem);
+        printf("usertrap(): out of memory (2)\n");
         goto err;
       }
 

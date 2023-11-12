@@ -16,8 +16,6 @@
 #include "file.h"
 #include "fcntl.h"
 
-#define min(a, b) ((a) < (b) ? (a) : (b))
-
 // Fetch the nth word-sized system call argument as a file descriptor
 // and return both the descriptor and the corresponding struct file.
 static int
@@ -400,15 +398,12 @@ sys_munmap(void)
   {
     begin_op();
     ilock(v.ip);
-    // printf("sys_munmap(): off %d\n", va - (uint64)v.addr + v.offset);
-    // printf("sys_munmap(): len %d\n", min(p->sz, PGROUNDUP(length)));
-    printf("sys_munmap(): off %d\n", va - v.addr);
-    writei(v.ip, 1, v.addr, va - v.addr + v.offset, min(p->sz, PGROUNDUP(length))); // fix
+    writei(v.ip, 1, v.addr, va - v.addr + v.offset, PGROUNDUP(length)); // fix
     iunlock(v.ip);
     end_op();
   }
   // calculate the number of pages
-  uint64 npages = min(p->sz, PGROUNDUP(length)) / PGSIZE;
+  uint64 npages = PGROUNDUP(length) / PGSIZE;
   uvmunmap(p->pagetable, va, npages, 1);
 
   // // update vma
