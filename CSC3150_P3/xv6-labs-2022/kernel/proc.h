@@ -98,7 +98,7 @@ enum procstate
 struct vma
 {
   // void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset)
-  void *addr;         // 起始虚拟地址
+  uint64 addr;        // 起始虚拟地址
   int length;         // 映射的长度
   int prot;           // 权限标志
   int flags;          // 标志

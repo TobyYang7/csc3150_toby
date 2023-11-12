@@ -259,26 +259,30 @@ uint64
 sys_mmap(void)
 {
   int length, prot, flags, fd, offset, idx;
+  // void *addr;
   struct file *mfile;
   struct proc *p = myproc();
 
   // fetch argument
+  // argaddr(0, addr);
   argint(1, &length);
   argint(2, &prot);
   argint(3, &flags);
   argfd(4, &fd, &mfile);
   argint(5, &offset);
 
+  // printf("sys_mmap(): RAW offset %d\n", offset);
+
   // value invalid
   if (length < 0 || prot < 0 || flags < 0 || fd < 0 || offset < 0)
   {
-    printf("sys_mmap(): invalid argument\n");
+    // printf("sys_mmap(): invalid argument\n");
     return -1;
   }
   // permission/flags conflict
   if (!mfile->writable && (prot & PROT_WRITE) && (flags & MAP_SHARED))
   {
-    printf("sys_mmap(): permission/flags conflict\n");
+    // printf("sys_mmap(): permission/flags conflict\n");
     return -1;
   }
 
@@ -288,7 +292,7 @@ sys_mmap(void)
   {
     if (p->vma[idx].length == 0) // free vma
     {
-      p->vma[idx].addr = (void *)p->sz;
+      p->vma[idx].addr = p->sz;
       p->vma[idx].length = length;
       p->vma[idx].prot = prot;
       p->vma[idx].flags = flags;
@@ -297,7 +301,8 @@ sys_mmap(void)
       p->vma[idx].mfile = filedup(mfile); // increment the reference count
       p->vma[idx].ip = mfile->ip;
       p->sz += PGROUNDUP(length);
-      printf("sys_mmap(): off %d\n", offset);
+      // printf("sys_mmap(): off %d\n", offset);
+      // printf("sys_mmap(): len %d\n", length);
       return (uint64)p->vma[idx].addr;
     }
     idx++;
@@ -311,10 +316,64 @@ sys_mmap(void)
 uint64
 sys_munmap(void)
 {
+  // struct proc *p = myproc();
+  // uint64 va;
+  // int length;
+  // int idx = 0;
+
+  // // fetch argument
+  // argaddr(0, &va);
+  // argint(1, &length);
+
+  // // argument invalid
+  // if (va < 0 || length < 0)
+  //   return -1;
+
+  // while (idx < VMASIZE)
+  // {
+  //   if (p->vma[idx].length == 0)
+  //     break;
+  //   // printf("sys_munmap(): START\n");
+  //   // printf("sys_munmap(): offset %d\n", va - (uint64)p->vma[idx].addr);
+  //   struct vma v = p->vma[idx];
+  //   if ((uint64)v.addr == va)
+  //   {
+  //     // printf("sys_munmap(): FOUND\n");
+  //     // if vma is writable, write back to file
+  //     if (v.prot & PROT_WRITE && v.flags & MAP_SHARED)
+  //     {
+  //       begin_op();
+  //       ilock(v.ip);
+  //       // printf("sys_munmap(): off %d\n", va - (uint64)v.addr + v.offset);
+  //       // printf("sys_munmap(): len %d\n", min(p->sz, PGROUNDUP(length)));
+  //       // printf("sys_munmap(): off %d\n", va - (uint64)v.addr);
+  //       writei(v.ip, 1, (uint64)v.addr, va - (uint64)v.addr + v.offset, min(p->sz, PGROUNDUP(length))); // fix
+  //       iunlock(v.ip);
+  //       end_op();
+
+  //       // // calculate the number of pages
+  //       uint64 npages = min(p->sz, PGROUNDUP(length)) / PGSIZE;
+  //       uvmunmap(p->pagetable, va, npages, 1);
+
+  //       length -= npages;
+  //       va += length;
+  //       p->vma[idx].addr += npages;
+  //       p->vma[idx].offset += npages;
+  //       p->vma[idx].length -= npages;
+  //       // printf("sys_munmap(): offset %d\n", va - (uint64)p->vma[idx].addr);
+  //       if (p->vma[idx].length == 0)
+  //         fileclose(p->vma[idx].mfile);
+  //       if (length == 0)
+  //         break;
+  //     }
+  //     // printf("sys_munmap(): offset %d\n", va - (uint64)p->vma[idx].addr);
+  //   }
+  //   idx++;
+  // }
   struct proc *p = myproc();
   uint64 va;
   int length;
-  int idx = -1;
+  int idx = 0;
 
   // fetch argument
   argaddr(0, &va);
@@ -327,7 +386,7 @@ sys_munmap(void)
   // find vma
   for (int i = 0; i < VMASIZE; i++)
   {
-    if (va >= (uint64)p->vma[i].addr && va < (uint64)p->vma[i].addr + p->sz)
+    if (va >= p->vma[i].addr && va < p->vma[i].addr + p->sz && p->vma[i].length != 0)
     {
       // printf("sys_munmap(): va - addr %d\n", va - (uint64)p->vma[idx].addr);
       idx = i;
@@ -343,8 +402,8 @@ sys_munmap(void)
     ilock(v.ip);
     // printf("sys_munmap(): off %d\n", va - (uint64)v.addr + v.offset);
     // printf("sys_munmap(): len %d\n", min(p->sz, PGROUNDUP(length)));
-    printf("sys_munmap(): off %d\n", va - (uint64)v.addr);
-    writei(v.ip, 1, (uint64)v.addr, va - (uint64)v.addr + v.offset, min(p->sz, PGROUNDUP(length))); // fix
+    printf("sys_munmap(): off %d\n", va - v.addr);
+    writei(v.ip, 1, v.addr, va - v.addr + v.offset, min(p->sz, PGROUNDUP(length))); // fix
     iunlock(v.ip);
     end_op();
   }
@@ -352,7 +411,7 @@ sys_munmap(void)
   uint64 npages = min(p->sz, PGROUNDUP(length)) / PGSIZE;
   uvmunmap(p->pagetable, va, npages, 1);
 
-  // update vma
+  // // update vma
   v.length -= length;
   va += length;
   p->vma[idx].addr += length;
