@@ -72,9 +72,48 @@ void usertrap(void)
   // TODO: page fault handling
   else if (r_scause() == 13 || r_scause() == 15)
   {
-    // uint64 va = r_stval();
-    printf("Now, after mmap, we get a page fault\n");
-    goto err;
+    uint64 va = PGROUNDDOWN(r_stval());
+    int idx = -1;
+    void *mem = kalloc();
+
+    // check mem
+    if (mem == 0)
+      goto err;
+
+    // find vma
+    for (int i = 0; i < MAXVA; i++)
+    {
+      if (va >= (uint64)p->vma[i].addr && va < (uint64)p->vma[i].addr + p->sz)
+      {
+        idx = i;
+        break;
+      }
+    }
+
+    // if not found, kill the process
+    if (idx == -1)
+      goto err;
+
+    else
+    {
+      struct vma v = p->vma[idx];
+      memset(mem, 0, PGSIZE); // zero out the memory
+
+      // map the page
+      if (mappages(p->pagetable, PGROUNDDOWN(va), PGSIZE, (uint64)mem, PTE_W | PTE_X | PTE_R | PTE_U) != 0)
+      {
+        kfree(mem);
+        goto err;
+      }
+
+      ilock(v.ip); // lock the inode
+      readi(v.ip, 0, (uint64)mem, va - (uint64)v.addr + v.offset, PGSIZE);
+      printf("usertrap(): off %d\n", va - (uint64)v.addr);
+      // printf("off %d\n", va - (uint64)v.addr + v.offset);
+      iunlock(v.ip); // unlock the inode
+      if (p->killed)
+        exit(-1);
+    }
   }
   else
   {

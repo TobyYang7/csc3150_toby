@@ -105,6 +105,7 @@ struct vma
   int fd;             // 文件描述符，表示映射的文件
   int offset;         // 文件中的起始偏移量
   struct file *mfile; // 对应的文件
+  struct inode *ip;   // 对应的inode
 };
 
 // Per-process state
