@@ -4239,7 +4239,7 @@ int devintr()
     80001e9e:	8552                	mv	a0,s4
     80001ea0:	ffffe097          	auipc	ra,0xffffe
     80001ea4:	17c080e7          	jalr	380(ra) # 8000001c <kfree>
-        printf("usertrap(): out of memory (2)\n");
+        printf("usertrap(): mappages error\n");
     80001ea8:	00006517          	auipc	a0,0x6
     80001eac:	42850513          	addi	a0,a0,1064 # 800082d0 <states.0+0xc0>
     80001eb0:	00004097          	auipc	ra,0x4
