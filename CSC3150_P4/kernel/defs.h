@@ -33,7 +33,6 @@ void            fileinit(void);
 int             fileread(struct file*, uint64, int n);
 int             filestat(struct file*, uint64 addr);
 int             filewrite(struct file*, uint64, int n);
-void            mapfile(struct file * f, char * mem, int offset);
 
 // fs.c
 void            fsinit(int);
@@ -146,7 +145,7 @@ void            syscall();
 extern uint     ticks;
 void            trapinit(void);
 void            trapinithart(void);
-extern struct spinlock  tickslock;
+extern struct spinlock tickslock;
 void            usertrapret(void);
 
 // uart.c

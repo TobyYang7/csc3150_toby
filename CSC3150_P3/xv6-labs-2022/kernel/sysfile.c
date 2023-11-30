@@ -299,8 +299,6 @@ sys_mmap(void)
       p->vma[idx].mfile = filedup(mfile); // increment the reference count
       p->vma[idx].ip = mfile->ip;
       p->sz += PGROUNDUP(length);
-      // printf("sys_mmap(): off %d\n", offset);
-      // printf("sys_mmap(): len %d\n", length);
       return (uint64)p->vma[idx].addr;
     }
     idx++;
@@ -330,7 +328,7 @@ sys_munmap(void)
   // find vma
   for (int i = 0; i < VMASIZE; i++)
   {
-    if (va >= p->vma[i].addr && va < p->vma[i].addr + p->sz && p->vma[i].length != 0)
+    if (va >= p->vma[i].addr && va < p->vma[i].addr + p->vma[i].length && p->vma[i].length != 0)
     {
       // printf("sys_munmap(): va - addr %d\n", va - (uint64)p->vma[idx].addr);
       idx = i;
@@ -352,7 +350,7 @@ sys_munmap(void)
   uint64 npages = PGROUNDUP(length) / PGSIZE;
   uvmunmap(p->pagetable, va, npages, 1);
 
-  // // update vma
+  // update vma
   v.length -= length;
   va += length;
   p->vma[idx].addr += length;

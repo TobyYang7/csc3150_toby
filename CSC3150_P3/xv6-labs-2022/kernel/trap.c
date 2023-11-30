@@ -74,21 +74,11 @@ void usertrap(void)
   {
     uint64 va = PGROUNDDOWN(r_stval());
     int idx = -1;
-
-    // void mapfile(struct file * f, char *mem, int offset)
     char *mem = kalloc();
-
-    // check mem
-    if (mem == 0)
-    {
-      printf("usertrap(): out of memory\n");
-      goto err;
-    }
 
     // find vma
     for (int i = 0; i < VMASIZE; i++)
     {
-      // printf("usertrap(): pre-off %d\n", va - p->vma[i].addr + p->vma[i].offset);
       if (va >= p->vma[i].addr && va < p->vma[i].addr + p->vma[i].length) // fix
       {
         // printf("usertrap(): off %d\n", va - p->vma[i].addr + p->vma[i].offset);
@@ -97,11 +87,10 @@ void usertrap(void)
         break;
       }
     }
-    // printf("usertrap(): off %d\n", va - p->vma[idx].addr + p->vma[idx].offset);
-    // if not found, kill the process
-    if (idx == -1)
+
+    if (idx == -1 || mem == 0)
     {
-      printf("usertrap(): invalid memory access\n");
+      printf("usertrap(): page fault\n");
       goto err;
     }
 
@@ -117,10 +106,7 @@ void usertrap(void)
         printf("usertrap(): mappages error\n");
         goto err;
       }
-
       mapfile(v.mfile, mem, va - v.addr + v.offset);
-      // printf("usertrap(): off %d\n", va - (uint64)v.addr);
-      // printf("off %d\n", va - (uint64)v.addr + v.offset);
       if (p->killed)
         exit(-1);
     }
